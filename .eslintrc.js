@@ -78,7 +78,6 @@ module.exports = {
         'node/no-unpublished-require': 'off', // Does not account for "build" scripts
         'node/no-unpublished-import': 'off', // Does not account for "build" scripts
         'node/shebang': 'off', // Tons of false positives
-
         'node/no-missing-import': [
           'error',
           {
