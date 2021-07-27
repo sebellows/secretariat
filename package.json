@@ -1,0 +1,126 @@
+{
+  "name": "secretariat",
+  "version": "0.1.0",
+  "description": "A CLI for handling the boring stuff of starting a project",
+  "keywords": [
+    "Git",
+    "CLI"
+  ],
+  "type": "module",
+  "main": "lib/cjs/index.ts",
+  "module": "es2020",
+  "types": "lib/ts/index.d.ts",
+  "source": "src/index",
+  "files": [
+    "src",
+    "lib"
+  ],
+  "engines": {
+    "node": "10.* || >= 12"
+  },
+  "author": "sebellows <seanbellows@gmail.com>",
+  "license": "Unlicense",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebellows/secretariat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sebellows/secretariat/issues"
+  },
+  "scripts": {
+    "build": "run-s build:esbuild build:ts",
+    "build:esbuild": "node -r esbuild-register scripts/build.ts",
+    "build:ts": "tsc --emitDeclarationOnly --outDir lib/ts --project tsconfig.lib.json --rootDir src",
+    "clean": "rimraf lib",
+    "lint": "eslint . --ext .js,.jsx,.mjs,.ts,.tsx --quiet",
+    "prebuild": "yarn clean",
+    "test": "jest",
+    "type-check": "tsc -b",
+    "watch": "run-p watch:*",
+    "watch:cjs": "tsc --preserveWatchOutput -w --module CommonJS --outDir lib/cjs --project tsconfig.lib.json --rootDir src --target ES5",
+    "watch:es": "tsc --preserveWatchOutput -w --module ES6 --outDir lib/esm --project tsconfig.lib.json --rootDir src --target ES6"
+  },
+  "dependencies": {
+    "@octokit/auth-basic": "^1.4.8",
+    "@octokit/core": "^3.5.1",
+    "@octokit/rest": "^18.7.1",
+    "chalk": "^4.1.1",
+    "clear": "^0.1.0",
+    "clui": "^0.3.6",
+    "configstore": "^6.0.0",
+    "figlet": "^1.5.0",
+    "inquirer": "^8.1.2",
+    "lodash": "^4.17.21",
+    "simple-git": "^2.41.1",
+    "touch": "^3.1.0",
+    "yargs": "^17.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.8",
+    "@babel/eslint-parser": "^7.14.7",
+    "@babel/preset-env": "^7.14.8",
+    "@babel/preset-typescript": "^7.14.5",
+    "@commitlint/config-conventional": "^13.1.0",
+    "@release-it/conventional-changelog": "^3.0.1",
+    "@types/clear": "^0.1.2",
+    "@types/clui": "^0.3.1",
+    "@types/configstore": "^5.0.1",
+    "@types/figlet": "^1.5.4",
+    "@types/inquirer": "^7.3.3",
+    "@types/node": "^16.4.3",
+    "@types/touch": "^3.1.2",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "commitlint": "^13.1.0",
+    "esbuild": "^0.12.16",
+    "esbuild-register": "^2.6.0",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "globby": "^12.0.0",
+    "husky": "^7.0.1",
+    "jest": "^27.0.6",
+    "lint-staged": "^11.1.1",
+    "prettier": "^2.3.2",
+    "release-it": "^14.10.1",
+    "typescript": "^4.3.5"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "yarn lint"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "release-it": {
+    "hooks": {
+      "before:init": [
+        "yarn lint",
+        "yarn test"
+      ],
+      "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
+    },
+    "git": {
+      "commitMessage": "chore: release ${version}",
+      "tagName": "v${version}"
+    },
+    "npm": {
+      "publish": true
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "angular"
+      }
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint"
+  }
+}
