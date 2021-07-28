@@ -9,10 +9,7 @@ import { isPlainObject } from './common'
 /**
  * Display an error and exit the current process.
  */
-export function handleBuildError(
-  msg: unknown,
-  err?: unknown
-): void {
+export function handleBuildError(msg: unknown, err?: unknown): void {
   const isENOENT = isPlainObject(err) && (err as NodeJS.ErrnoException)?.code === 'ENOENT'
   const method = isENOENT ? 'error' : 'exit'
 
@@ -53,7 +50,7 @@ export const resolveDir = async (path: string): Promise<string> => {
     return stats.isDirectory() ? dirPath : path
   } catch (err) {
     if (path === '.') {
-      handleBuildError(`Provided path points to Indigo's root directory ("${path}").`, err)
+      handleBuildError(`Provided path points to Secretariat's root directory ("${path}").`, err)
     }
 
     logger.warn(`Unable to resolve directory of "${path}", so directory is being created...`)
@@ -86,7 +83,7 @@ export const createDir = async (path: string | undefined): Promise<boolean> => {
 export const createFile = async (
   fileName: string,
   content: string,
-  args: InputArgs
+  args: InputArgs,
 ): Promise<void> => {
   const { outdir } = args
 
@@ -151,7 +148,7 @@ export const isFile = (filePath: PathLike, exitOnError = false): boolean => {
 export const findFile = async (
   dirPath: string,
   entry: string,
-  verbose = true
+  verbose = true,
 ): Promise<string | null> => {
   try {
     const files = await readdir(dirPath)

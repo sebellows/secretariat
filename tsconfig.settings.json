@@ -22,6 +22,7 @@
     "skipLibCheck": true,
 
     // Module resolution
+    "isolatedModules": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

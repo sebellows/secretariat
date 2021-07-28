@@ -6,17 +6,15 @@
     "Git",
     "CLI"
   ],
-  "type": "module",
-  "main": "lib/cjs/index.ts",
+  "main": "lib/index.js",
   "module": "es2020",
-  "types": "lib/ts/index.d.ts",
   "source": "src/index",
   "files": [
     "src",
     "lib"
   ],
   "engines": {
-    "node": "10.* || >= 12"
+    "node": ">= 12.20"
   },
   "author": "sebellows <seanbellows@gmail.com>",
   "license": "Unlicense",
@@ -29,17 +27,12 @@
     "url": "https://github.com/sebellows/secretariat/issues"
   },
   "scripts": {
-    "build": "run-s build:esbuild build:ts",
-    "build:esbuild": "node -r esbuild-register scripts/build.ts",
-    "build:ts": "tsc --emitDeclarationOnly --outDir lib/ts --project tsconfig.lib.json --rootDir src",
-    "clean": "rimraf lib",
+    "build": "node -r esbuild-register src/index",
+    "clean": "rimraf lib & rimraf bin",
     "lint": "eslint . --ext .js,.jsx,.mjs,.ts,.tsx --quiet",
-    "prebuild": "yarn clean",
     "test": "jest",
-    "type-check": "tsc -b",
-    "watch": "run-p watch:*",
-    "watch:cjs": "tsc --preserveWatchOutput -w --module CommonJS --outDir lib/cjs --project tsconfig.lib.json --rootDir src --target ES5",
-    "watch:es": "tsc --preserveWatchOutput -w --module ES6 --outDir lib/esm --project tsconfig.lib.json --rootDir src --target ES6"
+    "prebuild": "yarn clean",
+    "type-check": "tsc -b"
   },
   "dependencies": {
     "@octokit/auth-basic": "^1.4.8",
@@ -50,6 +43,7 @@
     "clui": "^0.3.6",
     "configstore": "^6.0.0",
     "figlet": "^1.5.0",
+    "globby": "^12.0.0",
     "inquirer": "^8.1.2",
     "lodash": "^4.17.21",
     "simple-git": "^2.41.1",
@@ -74,13 +68,13 @@
     "@typescript-eslint/parser": "^4.28.5",
     "commitlint": "^13.1.0",
     "esbuild": "^0.12.16",
+    "esbuild-loader": "^2.13.1",
     "esbuild-register": "^2.6.0",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.4.0",
-    "globby": "^12.0.0",
     "husky": "^7.0.1",
     "jest": "^27.0.6",
     "lint-staged": "^11.1.1",

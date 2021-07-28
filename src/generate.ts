@@ -6,13 +6,13 @@ import { pathExists } from './utils/fs'
 import { GitHubService } from './utils/git'
 import { RepoService } from './utils/repo'
 
-clear();
+clear()
 
-console.log(
+logger.log(
   logger.warn(
     figlet.textSync('Secretariat', { horizontalLayout: 'full' })
   )
-);
+)
 
 if (pathExists('.git')) {
   logger.exit('Already a Git repository!')
@@ -27,8 +27,8 @@ const getGithubToken = async () => {
 
   token = await GitHubService.getPersonalAccesToken() as string
 
-  return token;
-};
+  return token
+}
 
 const run = async () => {
   try {
@@ -52,15 +52,15 @@ const run = async () => {
         switch (err.status) {
           case 401:
             logger.error('Couldn\'t log you in. Please provide correct credentials/token.')
-            break;
+            break
           case 422:
             logger.error('There is already a remote repository or token with the same name')
-            break;
+            break
           default:
             logger.error(err)
         }
       }
   }
-};
+}
 
-run();
+run()

@@ -1,105 +1,38 @@
-import { writeFile } from 'fs/promises'
-import { join, resolve } from 'path'
-import esbuild from 'esbuild'
-import { globby } from 'globby'
+import { join } from 'path'
+import chalk from 'chalk'
 
-import { logger } from './logger'
+import { BinFileParams, build, writeBinFile } from './build'
+import { BASE_PATH, OUTPUT_PATH, ROOT_PATH } from './const'
 import { BuilderOptions } from './types'
-import { handleBuildError } from './utils/fs'
+import { handleBuildError, resolveDir } from './utils/fs'
 
-async function _findEntryPoints(root: string) {
-  const files = await globby([resolve(root, `**/*.ts`), resolve(root, `**/*.tsx`)])
+const SCRIPT_CONFIGS: BinFileParams[] = [
+  {
+    fileName: 'index.js',
+    filePath: `${OUTPUT_PATH}/generate.js`,
+  },
+]
 
-  return files.filter((file) => {
-    return (
-      !file.includes('__fixtures__') &&
-      !file.endsWith('.stories.tsx') &&
-      !file.endsWith('.test.ts') &&
-      !file.endsWith('.test.tsx')
-    )
-  })
-}
+const BUILD_ERROR_MSG = chalk.bold('[Secretariat] ESBuild of script files failed.')
 
-export async function generateConfig(
-  args: BuilderOptions
-): Promise<esbuild.BuildOptions | undefined> {
-  // eslint-disable-next-line prefer-const
-  let { entryPoints, format, outdir, root, ...rest } = args
+const handleScriptBuildError = (reason: unknown) => handleBuildError(BUILD_ERROR_MSG, reason)
 
-  if (!entryPoints && root) {
-    entryPoints = await _findEntryPoints(root)
-  }
+const run = async () => {
+  const outdir = await resolveDir(join(BASE_PATH, OUTPUT_PATH))
 
-  if (!outdir && !rest.outfile) {
-    logger.warn('generateConfig', 'no outdir specified', outdir, entryPoints, rest)
-
-    return undefined
-  }
-
-  return {
-    format: format as esbuild.Format,
-    target: 'esnext',
-    platform: 'node',
-    bundle: false,
+  const options: BuilderOptions = {
+    root: ROOT_PATH,
+    format: 'cjs',
     outdir,
-    sourcemap: false,
-    loader: { '.js': 'jsx' },
-    entryPoints,
-    ...rest,
   }
-}
 
-export async function build(args: BuilderOptions): Promise<void | esbuild.BuildResult> {
-  const options = await generateConfig(args)
+  const results = await build(options)
 
-  if (options) {
-    return esbuild.build(options)
+  if (!results || results instanceof Error) {
+    throw new Error(BUILD_ERROR_MSG)
   }
+
+  return Promise.all(SCRIPT_CONFIGS.map((config) => writeBinFile(config)))
 }
 
-/**
- * Build all formats via configuration.
- *
- * @example
- * await buildAll(
- *   {
- *     cjs: {
- *       outdir: 'dist/commonjs',
- *       target: 'es2015'
- *     }
- *     esm: {
- *       outdir: 'dist/module',
- *       target: 'es2015'
- *     }
- *   }`
- */
-export async function buildAll(
-  formatArgs: Record<string, BuilderOptions>
-): Promise<(void | esbuild.BuildResult)[]> {
-  const promises = Object.entries(formatArgs).map(async ([formatType, args]) => {
-    return build({ format: formatType as esbuild.Format, ...args })
-  })
-
-  return Promise.all(promises)
-}
-
-interface BinFileParams {
-  fileName: string
-  filePath: string
-  binDir: string
-}
-
-export const writeBinFile = async (params: BinFileParams): Promise<void> => {
-  const { fileName, filePath, binDir } = params
-
-  try {
-    const outputPath = join(binDir, `${fileName}.js`)
-    const tmpl = `#!/usr/bin/env node\n\nrequire('${filePath}');\n`
-
-    writeFile(outputPath, tmpl)
-  } catch (err: unknown) {
-    setTimeout(() => {
-      handleBuildError(`File "bin/${filePath}" does not exist.`)
-    })
-  }
-}
+run().catch(handleScriptBuildError)
